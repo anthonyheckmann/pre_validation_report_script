@@ -8,6 +8,22 @@ OS(){
     grep -oP  "$name_and_version_regex" /etc/os-release | tr -d \"
 }
 
+DOCKER_ACCESS() {
+    #normal
+    local -a dock_req=()
+    
+    if sudo docker version > /dev/null 2>&1; then
+        dock_req+=("root")
+    fi
+    if docker version > /dev/null 2>&1; then
+        dock_req+=("$(whoami)")
+    fi
+    if [[ ${#dock_req[@]} -gt 0 ]]; then
+        echo -n "Users checked: ${dock_req[*]}"
+    fi
+
+}
+
 
 #Sould return just version of Docker client. (Note \K in grep suppressed 1st group)
 DOCKER_V(){
@@ -25,18 +41,26 @@ STORAGE_SPACE(){
 
 #Looks for uid=0 via id command
 ROOT_ACCESS_INSTALL() {
+    # local id_dump="$( sudo id || id )"
     if  { sudo id || id; } |  grep -q "uid=0"; then
         echo "Available";
     else
         echo "No Root";
-    fi 
+    fi
+    
+}
+
+CURRENT_UID() {
+    echo "Current UID: $(id | grep -oP '(uid=)\K\d*')"
 }
 
 #Check for existence of sestatus command; then try running it and look if enabled
-SELINUX() { 
+SELINUX() {
+    local access_local=""
     if hash sestatus 2>/dev/null; then
 
-        { sestatus || sudo sestatus; } | grep -oP "(SELinux\Wstatus:\W+)\K\w*";
+        { { sestatus && access_usr="$(whoami)"; } || { sudo sestatus && access_usr="root"; }; } | grep -oP "(SELinux\Wstatus:\W+)\K\w*";
+        echo "accessed as $access_usr"
     else
         echo -e "Nothing Found"
     fi
@@ -74,16 +98,18 @@ $(dim_line)
 Linux Distribution & Version:
 $( boldo  "$(OS)")
 $(dim_line)
+Root Status:
+$( boldo "$(ROOT_ACCESS_INSTALL)")
+$( dimmo "$(CURRENT_UID)")
+$(dim_line)
 Docker Version:
 $( boldo "$(DOCKER_V)")
+$( dimmo "$(DOCKER_ACCESS)")
 $(dim_line)
 Space Report:
 $( boldo "$(STORAGE_SPACE)")
 $(dim_line)
-Root Status:
-$( boldo "$(ROOT_ACCESS_INSTALL)")
-$(dim_line)
-SELinux:
+SELinux Status:
 $( boldo "$(SELINUX)")
 $(dim_line)
 EOF
