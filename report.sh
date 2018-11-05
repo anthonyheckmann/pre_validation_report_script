@@ -57,12 +57,16 @@ CURRENT_UID() {
 #Check for existence of sestatus command; then try running it and look if enabled
 SELINUX() {
     local access_local=""
+    local grep_filter="(SELinux\Wstatus:\W+)\K\w*"
     if hash sestatus 2>/dev/null; then
-
-        { { sestatus && access_usr="$(whoami)"; } || { sudo sestatus && access_usr="root"; }; } | grep -oP "(SELinux\Wstatus:\W+)\K\w*";
-        echo "accessed as $access_usr"
-    else
-        echo -e "Nothing Found"
+    
+        if sestatus > /dev/null 2>&1; then
+            echo -n "$(sestatus | grep -oP "$grep_filter")"
+        elif sestatus > /dev/null 2>&1; then
+            echo -n "$(sudo sestatus | grep -oP "$grep_filter")"
+        else
+            echo "Nothing Found"
+        fi
     fi
 }
 
