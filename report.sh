@@ -16,7 +16,7 @@ ROOT_ACCESS_INSTALL="$( if  { sudo id || id; } |  grep -q "uid=0"; then echo "Av
 
 #Check for existence of sestatus command; then try running it and look if enabled
 SELINUX="$( { hash sestatus 2>/dev/null && { sestatus || sudo sestatus; } | grep -oP "(SELinux\Wstatus:\W+)\K\w*"; } \
-|| echo -e "Nothing Found\e[0m" )"
+|| echo -e "Nothing Found" )"
 
 bold="\e[1m"
 reseto="\e[0m"
