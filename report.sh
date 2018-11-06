@@ -200,13 +200,13 @@ SELINUX_STATUS() {
 
         #Since sestatus exists, we'll print out it's status
         if sestatus > /dev/null 2>&1; then
-            boldo "Running as:$(whoami) with Status: $(sestatus | grep -oP "$grep_filter")"
+            boldo "Running as:$(whoami) with Status: $(sestatus | grep -oP "$grep_filter")\n"
         elif sudo sestatus > /dev/null 2>&1; then
-            boldo "Running as:$(sudo whoami) with Status: $(sudo sestatus | grep -oP "$grep_filter")"
+            boldo "Running as:$(sudo whoami) with Status: $(sudo sestatus | grep -oP "$grep_filter")\n"
         else
-            boldo "Odd Finding: sestatus command exists, but cannot be run"
+            boldo "Odd Finding: sestatus command exists, but cannot be run\n"
         fi
-        red_red " You may need to run: \"chcon -t container_file_t <mount_point\" to ensure access"
+        red_red "You may need to run: \"chcon -t container_file_t <mount_point\" to ensure access"
     else
         boldo "Nothing Found"
     fi
@@ -227,7 +227,7 @@ Linux Distribution & Version:
 $( boldo  "$(OS_INFO)")
 $(dim_line)
 Root Status:
-$( ROOT_ACCESS_PRESENT; dimmo " current id/name:($(CURRENT_UID)/$(CURRENT_USER)") )
+$( ROOT_ACCESS_PRESENT; dimmo " current id/name:($(CURRENT_UID)/$(CURRENT_USER))" )
 $(dim_line)
 Docker Version:
 $( boldo "$(DOCKER_VERSION)")$(dimmo "$(DOCKER_VALID_USERS)")
