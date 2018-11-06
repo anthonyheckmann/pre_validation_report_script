@@ -97,10 +97,10 @@ MACHINE_INFO(){
         cpus="$(nproc)"
         memory="$(free --si | grep Mem | awk '{print $2}')"
         if [[ $memory -lt "$RAM_NEEDED" ]]; then
-            red_red "Insufficent RAM $(echo "$memory" | awk '{byte =$1 /1024/1024/1024; print byte " GB"}')"
+            red_red "Insufficent RAM $(echo "$memory" | awk '{byte =$1 /1024/1024; print byte " GB"}')\n"
         fi
         if [[ $cpus -lt $CORES_NEEDED ]]; then
-            red_red "More cores needed\n$CORES_NEEDED required\n"
+            red_red "More cores needed -- $CORES_NEEDED required\n"
         fi
         cat <<EOF
 vCPUs:  $cpus
@@ -227,7 +227,7 @@ Linux Distribution & Version:
 $( boldo  "$(OS_INFO)")
 $(dim_line)
 Root Status:
-$( ROOT_ACCESS_PRESENT; dimmo " current id/name:$(CURRENT_UID)/$(CURRENT_USER)" )
+$( ROOT_ACCESS_PRESENT; dimmo " current id/name:($(CURRENT_UID)/$(CURRENT_USER)") )
 $(dim_line)
 Docker Version:
 $( boldo "$(DOCKER_VERSION)")$(dimmo "$(DOCKER_VALID_USERS)")
