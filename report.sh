@@ -4,6 +4,10 @@ NOTES=( )
 
 SPACE_NEEDED="65GB"
 DOCKER_NEEDED="1.13"
+CORES_NEEDED=10
+#32GB in bytes times .9
+RAM_NEEDED=32815940
+MIN_CORE_RAM_RATIO="0.2"
 
 
 
@@ -78,6 +82,34 @@ OS_INFO(){
     done
 }
 
+MACHINE_INFO(){
+    local needed=( )
+    local utils_needed=( nproc free )
+    local cpus memory
+    for util in "${utils_needed[@]}"; do
+        if ! hash "$util" 2>/dev/null; then
+            needed+=( "$util" )
+        fi
+    done
+    if [[ "${#needed[@]}" -gt 0 ]]; then
+        red_red "Missing these: ${needed[*]} for machine report"
+    else
+        cpus="$(nproc)"
+        memory="$(free --si | grep Mem | awk '{print $2}')"
+        if [[ $memory -lt "$RAM_NEEDED" ]]; then
+            red_red "Insufficent RAM $(echo "$memory" | awk '{byte =$1 /1024/1024/1024; print byte " GB"}')"
+        fi
+        if [[ $cpus -lt $CORES_NEEDED ]]; then
+            red_red "More cores needed\n$CORES_NEEDED required\n"
+        fi
+        cat <<EOF
+vCPUs:  $cpus
+RAM:    $(echo "$memory" | awk '{byte =$1 /1024**2; print byte " GB"}') ( $RAM_NEEDED needed)
+EOF
+
+    fi
+
+}
 
 
 
@@ -187,6 +219,9 @@ AFTER_NOTES(){
 
 
 cat <<EOF
+$(dim_line)
+Machine Specs:
+$( MACHINE_INFO )
 $(dim_line)
 Linux Distribution & Version:
 $( boldo  "$(OS_INFO)")
